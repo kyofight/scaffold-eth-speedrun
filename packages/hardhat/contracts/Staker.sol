@@ -31,9 +31,9 @@ contract Staker {
     require(msg.value > 0, "stake ETH must greater than 0");
     require(block.timestamp <= deadline, "deadline passed");
     unchecked {
-      balances[tx.origin] += msg.value;
+      balances[msg.sender] += msg.value;
     }
-    emit Stake(tx.origin, msg.value);
+    emit Stake(msg.sender, msg.value);
   }
 
   // After some `deadline` allow anyone to call an `execute()` function
@@ -65,7 +65,10 @@ contract Staker {
 
   // Add the `receive()` special function that receives eth and calls stake()
   receive() external payable {
-    this.stake{value: msg.value}();
+    (bool success,) = address(this).delegatecall(
+        abi.encodeWithSignature("stake()")
+    );
+    assert(success);
   }
 
 }
