@@ -34,7 +34,7 @@ describe("🚩 Challenge 1: 🥩 Decentralized Staking App", function () {
       });
     }
 
-    describe("mintItem()", function () {
+    describe("stake()", function () {
       it("Balance should go up when you stake()", async function () {
         const [owner] = await ethers.getSigners();
 
