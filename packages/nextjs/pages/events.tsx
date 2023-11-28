@@ -13,12 +13,12 @@ const Events: NextPage = () => {
     fromBlock: 0n,
   });
 
-  // // SellTokens Events
-  // const { data: sellTokenEvents, isLoading: isSellEventsLoading } = useScaffoldEventHistory({
-  //   contractName: "Vendor",
-  //   eventName: "SellTokens",
-  //   fromBlock: 0n,
-  // });
+  // SellTokens Events
+  const { data: sellTokenEvents, isLoading: isSellEventsLoading } = useScaffoldEventHistory({
+    contractName: "Vendor",
+    eventName: "SellTokens",
+    fromBlock: 0n,
+  });
 
   return (
     <>
@@ -57,8 +57,8 @@ const Events: NextPage = () => {
                           <td className="text-center">
                             <Address address={event.args.buyer} />
                           </td>
-                          <td>{utils.formatEther(event.args.amountOfETH).toString()}</td>
-                          <td>{utils.formatEther(event.args.amountOfTokens).toString()}</td>
+                          <td>{utils.formatEther(event.args.amountOfETH ?? 0).toString()}</td>
+                          <td>{utils.formatEther(event.args.amountOfTokens ?? 0).toString()}</td>
                         </tr>
                       );
                     })
@@ -70,7 +70,7 @@ const Events: NextPage = () => {
         </div>
 
         {/* SellTokens Events */}
-        {/* <div className="mt-14">
+        <div className="mt-14">
           <div className="text-center mb-4">
             <span className="block text-2xl font-bold">Sell Token Events</span>
           </div>
@@ -102,8 +102,8 @@ const Events: NextPage = () => {
                           <td className="text-center">
                             <Address address={event.args.seller} />
                           </td>
-                          <td>{utils.formatEther(event.args.amountOfTokens).toString()}</td>
-                          <td>{utils.formatEther(event.args.amountOfETH).toString()}</td>
+                          <td>{utils.formatEther(event.args.amountOfTokens ?? 0).toString()}</td>
+                          <td>{utils.formatEther(event.args.amountOfETH ?? 0).toString()}</td>
                         </tr>
                       );
                     })
@@ -112,7 +112,7 @@ const Events: NextPage = () => {
               </table>
             </div>
           )}
-        </div> */}
+        </div>
       </div>
     </>
   );
