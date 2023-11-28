@@ -36,7 +36,7 @@ contract Staker {
 
   // After some `deadline` allow anyone to call an `execute()` function
   // If the deadline has passed and the threshold is met, it should call `exampleExternalContract.complete{value: address(this).balance}()`
-  function execute() notCompleted external payable {
+  function execute() notCompleted external {
     require(openForWithdraw == false, "withdraw is available");
     if (address(this).balance >= threshold) {
       exampleExternalContract.complete{value: address(this).balance}();
@@ -46,7 +46,7 @@ contract Staker {
   }
 
   // If the `threshold` was not met, allow everyone to call a `withdraw()` function to withdraw their balance
-  function withdraw() notCompleted external payable {
+  function withdraw() notCompleted external {
     require(address(this).balance < threshold, "threshold was met");
     require(openForWithdraw == true, "withdraw is not available");
     require(balances[msg.sender] > 0, "you have no stake");
