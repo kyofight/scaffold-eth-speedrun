@@ -22,6 +22,10 @@ contract Streamer is Ownable {
       - updates the balances mapping with the eth received in the function call
       - emits an Opened event
     */
+    require(balances[msg.sender] == 0, "you already have a channel");
+    balances[msg.sender] += msg.value;
+    canCloseAt[msg.sender] = 0;
+    emit Opened(msg.sender, msg.value);
   }
 
   function timeLeft(address channel) public view returns (uint256) {
@@ -59,6 +63,14 @@ contract Streamer is Ownable {
           - adjust the channel balance, and pay the Guru(Contract owner). Get the owner address with the `owner()` function.
           - emit the Withdrawn event
     */
+    address signer = ecrecover(prefixedHashed, voucher.sig.v, voucher.sig.r, voucher.sig.s);
+    require(balances[signer] > 0 && balances[signer] > voucher.updatedBalance, "not enough balance");
+    uint256 payment = balances[signer] - voucher.updatedBalance;
+    address to = owner();
+    (bool success,) = payable(to).call{value: payment}("");
+    require(success);
+    balances[signer] = voucher.updatedBalance;
+    emit Withdrawn(to, payment);
   }
 
   /*
@@ -70,6 +82,12 @@ contract Streamer is Ownable {
     - emits a Challenged event
   */
 
+  function challengeChannel() external {
+    require(balances[msg.sender] > 0 && canCloseAt[msg.sender] == 0, "no active channel or already challenged");
+    canCloseAt[msg.sender] = block.timestamp + 30 seconds;
+    emit Challenged(msg.sender);
+  }
+
   /*
     Checkpoint 5b: Close the channel
 
@@ -79,6 +97,13 @@ contract Streamer is Ownable {
     - sends the channel's remaining funds to msg.sender, and sets the balance to 0
     - emits the Closed event
   */
+  function defundChannel() external {
+    require(balances[msg.sender] > 0 && canCloseAt[msg.sender] != 0 && block.timestamp > canCloseAt[msg.sender], "cannot defund");
+    (bool success,) = payable(msg.sender).call{value: balances[msg.sender]}("");
+    require(success);
+    balances[msg.sender] = 0;
+    emit Closed(msg.sender);
+  }
 
   struct Voucher {
     uint256 updatedBalance;

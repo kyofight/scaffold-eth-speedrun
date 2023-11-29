@@ -129,8 +129,17 @@ const Streamer: NextPage = () => {
        */
       const existingVoucher = vouchers[clientAddress];
 
+      const packed = encodePacked(["uint256"], [updatedBalance]);
+      const hashed = keccak256(packed);
+      const arrayified = toBytes(hashed);
+      const isVerified = await verifyMessage({
+        address: clientAddress,
+        message: { raw: arrayified },
+        signature: data.signature,
+      });
+
       // update our stored voucher if this new one is more valuable
-      if (existingVoucher === undefined || updatedBalance < existingVoucher.updatedBalance) {
+      if (isVerified && (existingVoucher === undefined || updatedBalance < existingVoucher.updatedBalance)) {
         setVouchers(vouchers => ({ ...vouchers, [clientAddress]: { ...data, updatedBalance } }));
       }
     }
@@ -212,15 +221,15 @@ const Streamer: NextPage = () => {
   });
 
   // Checkpoint 5
-  // const { writeAsync: challengeChannel } = useScaffoldContractWrite({
-  //   contractName: "Streamer",
-  //   functionName: "challengeChannel",
-  // });
+  const { writeAsync: challengeChannel } = useScaffoldContractWrite({
+    contractName: "Streamer",
+    functionName: "challengeChannel",
+  });
 
-  // const { writeAsync: defundChannel } = useScaffoldContractWrite({
-  //   contractName: "Streamer",
-  //   functionName: "defundChannel",
-  // });
+  const { writeAsync: defundChannel } = useScaffoldContractWrite({
+    contractName: "Streamer",
+    functionName: "defundChannel",
+  });
 
   const [recievedWisdom, setReceivedWisdom] = useState("");
 
@@ -346,13 +355,13 @@ const Streamer: NextPage = () => {
                     </div>
 
                     {/* Checkpoint 4: */}
-                    {/* <CashOutVoucherButton
+                    <CashOutVoucherButton
                       key={clientAddress}
                       clientAddress={clientAddress}
                       challenged={challenged}
                       closed={closed}
                       voucher={vouchers[clientAddress]}
-                    /> */}
+                    />
                   </div>
                 ))}
               </div>
@@ -389,7 +398,7 @@ const Streamer: NextPage = () => {
                   </div>
 
                   {/* Checkpoint 5: challenge & closure */}
-                  {/* <div className="flex flex-col items-center pb-6">
+                  <div className="flex flex-col items-center pb-6">
                     <button
                       disabled={challenged.includes(userAddress)}
                       className="btn btn-primary"
@@ -427,7 +436,7 @@ const Streamer: NextPage = () => {
                     >
                       Close and withdraw funds
                     </button>
-                  </div> */}
+                  </div>
                 </div>
               ) : userAddress && closed.includes(userAddress) ? (
                 <div className="text-lg">
